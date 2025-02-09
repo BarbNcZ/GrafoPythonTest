@@ -5,26 +5,26 @@ A matriz usada no Script foi criada com base no esboço a seguir:
 ## Def dividirID
 O ID de um espaço é composto por um UUID, seguido de espessura/peso da estrada (se for estrada) ou -1 quando for espaço vazio, seguido de um id/nome de estrada ou id de um prédio/armazém, por fim seguido do nome da outra estrada na qual se for uma estrada com cruzamento.
 ### Exemplos: 
-#### Espaço vazio: 
-550e8400-e29b-41d4-a716-446655440000_-1
+#### _Espaço vazio:_
+`550e8400-e29b-41d4-a716-446655440000_-1`
 
-#### Estrada com 1 de espessura: 
-550e8400-e29b-41d4-a716-446655440000_0_4
+#### _Estrada com 1 de espessura:_
+`550e8400-e29b-41d4-a716-446655440000_0_4`
 
-#### Estrada com 2 de espessura: 
-550e8400-e29b-41d4-a716-446655440000_00_4
+#### _Estrada com 2 de espessura:_
+`550e8400-e29b-41d4-a716-446655440000_00_4`
 
-#### Estrada com cruzamento 1 de espessura: 
-550e8400-e29b-41d4-a716-446655440000_0_4_2
+#### _Estrada com cruzamento 1 de espessura:_
+`550e8400-e29b-41d4-a716-446655440000_0_4_2`
 
-#### Estrada com cruzamento 2 de espessura: 
-550e8400-e29b-41d4-a716-446655440000_00_4_2
+#### _Estrada com cruzamento 2 de espessura:_
+`550e8400-e29b-41d4-a716-446655440000_00_4_2`
 
-#### Prédio:
-550e8400-e29b-41d4-a716-446655440000_5
+#### _Prédio:_
+`550e8400-e29b-41d4-a716-446655440000_5`
 
-#### Armazém:
-550e8400-e29b-41d4-a716-446655440000_a3
+#### _Armazém:_
+`550e8400-e29b-41d4-a716-446655440000_a3`
 
 Nota-se que o ID de um espaço contém todas essas informações separadas por “_”, sendo assim esta função apenas divide cada uma destas informações e as armazena individualmente em um array, retornando este array.
 
