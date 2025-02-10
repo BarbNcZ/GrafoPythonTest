@@ -2,10 +2,10 @@ import graphviz as gv
 import uuid
 from collections import defaultdict
 
-#-1 = espaço vazio
-#0 = estrada
-#a(ID) = armazem
-#(ID) = predio
+# -1 = Empty space
+# 0 = Road
+# a(ID) = Warehouse
+# (ID) = Building
 
 x = [[str(uuid.uuid4()) + "_-1" , str(uuid.uuid4()) + "_0_1" , str(uuid.uuid4()) + "_-1" , str(uuid.uuid4()) + "_0_2" , str(uuid.uuid4()) + "_-1" , str(uuid.uuid4()) + "_-1" , str(uuid.uuid4()) + "_00_3" , str(uuid.uuid4()) + "_00_3" , str(uuid.uuid4()) + "_-1" , str(uuid.uuid4()) + "_-1" ],
      [str(uuid.uuid4()) + "_5" , str(uuid.uuid4()) + "_0_1" , str(uuid.uuid4()) + "_-1" , str(uuid.uuid4()) + "_0_2" , str(uuid.uuid4()) + "_a3" , str(uuid.uuid4()) + "_8" , str(uuid.uuid4()) + "_00_3" , str(uuid.uuid4()) + "_00_3" , str(uuid.uuid4()) + "_a2" , str(uuid.uuid4()) + "_a2" ],
