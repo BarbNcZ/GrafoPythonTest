@@ -2,10 +2,10 @@ import graphviz as gv
 import uuid
 from collections import defaultdict
 
-'''-1 = espaço vazio
-0 = estrada
-a(ID) = armazem
-(ID) = predio'''
+#-1 = espaço vazio
+#0 = estrada
+#a(ID) = armazem
+#(ID) = predio
 
 x = [[str(uuid.uuid4()) + "_-1" , str(uuid.uuid4()) + "_0_1" , str(uuid.uuid4()) + "_-1" , str(uuid.uuid4()) + "_0_2" , str(uuid.uuid4()) + "_-1" , str(uuid.uuid4()) + "_-1" , str(uuid.uuid4()) + "_00_3" , str(uuid.uuid4()) + "_00_3" , str(uuid.uuid4()) + "_-1" , str(uuid.uuid4()) + "_-1" ],
      [str(uuid.uuid4()) + "_5" , str(uuid.uuid4()) + "_0_1" , str(uuid.uuid4()) + "_-1" , str(uuid.uuid4()) + "_0_2" , str(uuid.uuid4()) + "_a3" , str(uuid.uuid4()) + "_8" , str(uuid.uuid4()) + "_00_3" , str(uuid.uuid4()) + "_00_3" , str(uuid.uuid4()) + "_a2" , str(uuid.uuid4()) + "_a2" ],
@@ -54,7 +54,7 @@ def getElementRight(row, indiceColuna):
      if len(row) == 0:
           return
 
-     '''buscar o indice de um elemento dentro de um array'''
+     #Search for the index of an element within an array
 
      if indiceColuna < 0:
           return
@@ -74,7 +74,7 @@ def getElementLeft(row, indiceColuna):
 
 def getElementTop(indiceColuna, row, array, indiceLinha):
 
-     '''evitar erro/excecao de indexOutOfBounds'''
+     #Avoid indexOutOfBounds error/exception
      if array == None or len(array) == 0:
           return
      if len(row) == 0:
@@ -91,7 +91,7 @@ def getElementTop(indiceColuna, row, array, indiceLinha):
           return
 
 def getElementDown(indiceColuna, row, array, indiceLinha):
-     '''evitar erro/excecao de indexOutOfBounds'''
+     #Avoid indexOutOfBounds error/exception
      if array == None or len(array) == 0:
           return
      if len(row) == 0:
@@ -152,7 +152,7 @@ def getDiagonalTopRight(indiceColuna, row, array, indiceLinha):
           return
 
 def getDiagonalDownLeft(indiceColuna, row, array, indiceLinha):
-     '''evitar erro/excecao de indexOutOfBounds'''
+     #Avoid indexOutOfBounds error/exception
      if array == None or len(array) == 0:
           return
      if len(row) == 0:
@@ -173,7 +173,7 @@ def getDiagonalDownLeft(indiceColuna, row, array, indiceLinha):
           return
 
 def getDiagonalDownRight(indiceColuna, row, array, indiceLinha):
-     '''evitar erro/excecao de indexOutOfBounds'''
+     #Avoid indexOutOfBounds error/exception
      if array == None or len(array) == 0:
           return
      if len(row) == 0:
@@ -197,21 +197,21 @@ def interseccao(indiceColuna, row, array, indiceLinha):
 
      element = row[indiceColuna]
 
-     #dividindo ID do elemento a ser processado
+     #Splitting ID of element to be processed
      idDividido = dividirID(element)
 
      if idDividido == None:
           return
 
-     '''Verificando se o elemento a ser processado é um estrada com base na informacao de espessura
-     trazida pelo ID que foi dividido'''
+     #Checking if the element to be processed is a Road based on the thickness information
+     #brought by the ID that was split
      isRoad = idDividido [0] == '0' or idDividido[0] == '00'
 
-     #Se a variável acima não é verdadeira, entao nao ha interseccoes, retornando nada
+     #If the above variable is not true, then there are no intersections, returning nothing
      if not isRoad:
           return
 
-     #Buscando as 4 diagonais do elemento a ser processado
+     #Searching for the 4 diagonals of the element to be processed
      diagonalTopLeft = getDiagonalTopLeft(indiceColuna, row, array, indiceLinha)
      diagonalTopRight = getDiagonalTopRight(indiceColuna, row, array, indiceLinha)
      diagonalDownLeft = getDiagonalDownLeft(indiceColuna, row, array, indiceLinha)
@@ -219,16 +219,16 @@ def interseccao(indiceColuna, row, array, indiceLinha):
 
      diagonais = [diagonalTopLeft, diagonalTopRight, diagonalDownLeft, diagonalDownRight]
 
-     #Filtrando e armazenando em um array apenas as diagonais identificadas com estrada
+     #Filtering and storing in an array only the diagonals identified as road
      estradas = [x for x in diagonais if dividirID(x) != None and (dividirID(x) [0] == '0' or dividirID(x) [0] == '00')]
 
-     #Se a quantidade de estradas identificadas for igual a 2
+     #If the number of identified roads is equal to 2
      if len(estradas) == 2:
 
           idEstrada1 = None
           idEstrada2 = None
 
-          #Extraindo o id/nome das 2 estradas
+          #Extracting the id/name of the 2 roads
           for estrada in estradas:
               estradaDividida = dividirID(estrada)
 
@@ -238,22 +238,22 @@ def interseccao(indiceColuna, row, array, indiceLinha):
               else:
                    idEstrada2 = estradaDividida [1]
 
-          '''Verificando se o id/nome das 2 estradas sao o mesmo, sendo assim retorna o UUID do espaço
-          e o tipo de interseccao (estradas de mesma espessura) representado por x'''
+          #Checking if the id/name of the 2 roads are the same, thus returning the UUID of the space
+          #and the type of intersection (roads of the same thickness) represented by x
           if idEstrada2 != None and idEstrada1 != None and idEstrada2 == idEstrada1:
                return idDividido[len(idDividido) - 1] + '_x'
 
           else:
                return
 
-     #Se a quantidade de estradas identificadas for igual a 3
+     #If the number of identified roads is equal to 3
      elif len(estradas) == 3:
           idEstrada1 = None
           idEstrada2 = None
           idEstrada3 = None
 
 
-          #Extraindo o id/nome das 3 estradas
+          #Extracting the id/name of the 3 roads
           for estrada in estradas:
                estradaDividida = dividirID(estrada)
 
@@ -266,9 +266,9 @@ def interseccao(indiceColuna, row, array, indiceLinha):
                else:
                     idEstrada3 = estradaDividida[1]
 
-          '''Verificando se o id/nome das 2 estradas sao o mesmo, e o id/nome de uma estrada é o mesmo
-          do elemento a ser processado, sendo assim retorna o UUID do espaço e o tipo de interseccao
-          (estradas de espessuras diferentes) representado por y'''
+          #Checking if the id/name of the 2 roads are the same, and the id/name of a road
+          #is the same as the element to be processed, thus returning the UUID of the space and the type of intersection
+          #(roads of different thicknesses) represented by y
           if idEstrada2 != None and idEstrada1 != None and idEstrada3 != None:
                idEstradas = [idEstrada1, idEstrada2, idEstrada3]
 
@@ -310,22 +310,22 @@ def nextStep(indiceColuna, row, array, indiceLinha):
 
      elementWithUuid = row[indiceColuna]
 
-     #dividindo o id do elemento a ser processado
+     #Splitting the id of the element to be processed
      idDividido = dividirID(elementWithUuid)
 
-     #Buscando todas as informacoes do id do espaço a ser processado excluindo o UUID
+     #Fetching all information from the space id to be processed excluding the UUID
      element = elementWithUuid[elementWithUuid.find('_') +1:]
 
-     '''Verificando se o elemento a ser processado é um estrada com base na informacao de espessura
-     trazida pelo ID que foi dividido'''
+     #Checking if the element to be processed is a road based on the thickness information
+     #brought by the ID that was split'''
      isRoad = idDividido[0] == '0' or idDividido[0] == '00'
 
-     '''Verifica se o elemento a ser processado não é estrada nem espaco vazio representado por -1
-     e tambem se ainda nao existe um no inicial representado pelo id de um predio ou armazem'''
+     #Checks if the element to be processed is not a road or empty space represented by -1
+     #and also if there is not already an initial node represented by the id of a building or warehouse'''
      if not isRoad and element != '-1' and nodePartida == None:
           nodePartida = element
 
-     #Verifica se o elemento a ser processado não é estrada nem espaco vazio representado por -1
+     #Checks if the element to be processed is not a road or empty space represented by -1
      elif not isRoad and element != '-1':
           partida = nodePartida
           nodePartida = None
@@ -333,22 +333,22 @@ def nextStep(indiceColuna, row, array, indiceLinha):
           interseccoes = []
           return [partida, element]
 
-     #Verifica se o elemento a ser processado não é espaço vazio representado por -1 e se ja existe um no inicial
-     #representado pelo id de um predio ou armazem
+     #Checks if the element to be processed is not an empty space represented by -1
+     #and if there is already an initial one represented by the id of a building or warehouse
      elif element != '-1' and nodePartida != None:
 
-          #Armazena o UUID do espaço a ser processado em um array que representa o caminho que esta sendo feito
-          #pelos espacos do tipo estrada
+          #Stores the UUID of the space to be processed in an array that represents the path being taken
+          #through the road-type spaces
           backtrack.append(idDividido [len(idDividido) - 1])
 
-          #Busca uma interseccao no espaco a ser processado
+          #Searches for an intersection in the space to be processed
           crossroad = interseccao(indiceColuna, row, array, indiceLinha)
 
-          #Verifica se ha uma interseccao no esaco a ser processado
+          #Checks if there is an intersection in the space to be processed
           if crossroad != None:
 
-               #Se houver interseccoes, verifica se a ultima interseccao armazenada é diferente da interseccao encontrada
-               #no espaco a ser processado e entao a armazena caso seja diferente
+               #If there is an intersection, it checks whether the last stored intersection is different from
+               #the intersection found in the space to be processed and then stores it if it is different.
                if len(interseccoes) > 0:
                    lastCrossroad = interseccoes[len(interseccoes) - 1]
                    lastCrossroadType = lastCrossroad.split('_')[1]
@@ -357,13 +357,13 @@ def nextStep(indiceColuna, row, array, indiceLinha):
                    if crossroad not in interseccoes and lastCrossroadType != crossroadType:
                         interseccoes.append(crossroad)
 
-               #Se nao houver interseccoes, armazena a interseccao do espaco a ser processado
+               #If there are no intersections, store the intersection of the space to be processed
                else:
                    if crossroad not in interseccoes:
                         interseccoes.append(crossroad)
 
 
-          #Buscando os 4 espacos do elemento a ser processado em uma linha ortogonal
+          #Searching for the 4 spaces of the element to be processed in an orthogonal line
           top = getElementTop(indiceColuna, row, array, indiceLinha)
           down = getElementDown(indiceColuna, row, array, indiceLinha)
           left = getElementLeft(row, indiceColuna)
@@ -379,11 +379,11 @@ def nextStep(indiceColuna, row, array, indiceLinha):
           rightElement = None
 
 
-          #Se houver um espaco acima do elemento a ser processado
+          #If there is a space above the element to be processed
           if top != None:
-               #Busca o id dividido deste espaco acima do elemento a ser processado
+               #Fetches the split id of this space above the element to be processed
                topDividido = dividirID(top[0])
-               #Buscando todas as informacoes do id do espaço acima do elemento a ser processado excluindo o UUID
+               #Fetching all id information from the space above the element to be processed excluding the UUID
                topElement = top[0][top[0].find('_') + 1:]
 
           if down != None:
@@ -399,18 +399,18 @@ def nextStep(indiceColuna, row, array, indiceLinha):
                rightElement = right[0][right[0].find('_') + 1:]
 
 
-          #Verifica se o espaco acima do elemento a ser processado nao e do tipo estrada nem mesmo do tipo espaco vazio
-          #alem de tambem verificar se o espaco acima do elemento e diferente do no inicial do qual e um id de predio ou armazem
+          #Checks if the space above the element to be processed is not of the road type or even of the empty space type,
+          #and also checks if the space above the element is different from the initial node of which is a building or warehouse id
           if topDividido != None and (topDividido[0] != '0' and topDividido[0] != '00') and topElement != '-1' and topElement != nodePartida:
 
-               #Exibe os nos entre um predio ou armazem e outro
+               #Displays the nodes between one building or warehouse and another
                print('Nova aresta ', nodePartida, topElement)
                #Exibe os nos de interseccao entre um predio ou armazem e outro
                print('Interseccoes ', [x.split('_')[1] for x in interseccoes])
                print('----------')
 
-               #Cria no graphviz os nos entre um predio ou armazem e outro e as arestas entre eles das quais passam por
-               #outros nos que sao os nos de interseccao de estradas representados por x ou y
+               #Creates in graphviz the nodes between one building or warehouse and another and the edges between them
+               #that pass through other nodes which are the intersection nodes of roads represented by x or y
                for crossroad in interseccoes:
                    crossroadType = crossroad.split ('_') [1]
                    d.edge(nodePartida, crossroadType)
@@ -448,24 +448,24 @@ def nextStep(indiceColuna, row, array, indiceLinha):
                return [nodePartida, rightElement]
 
 
-          # Verifica se o espaco acima do elemento a ser processado e do tipo estrada alem de tambem verificar se o UUID
-          # do espaco acima do elemento nao foi armazenado no array que representa o caminho que esta sendo feito
-          # pelos espacos do tipo estrada
+          #Checks if the space above the element to be processed is of the road type and also checks if the UUID of the space
+          #above the element has not been stored in the array that represents the path being taken through the road type spaces
+
           elif topDividido != None and (topDividido [0] == '0' or topDividido[0] == '00') and topDividido[len(topDividido) -1] not in backtrack:
 
-               #Caso a verificacao acima seja verdadeira, chama-se novamento o proprio metodo de nextStep (recursividade),
-               #passando assim o indice da coluna do elemento, todos os elementos da linha, toda a matriz, o indice da linha de cima
-               #do espaço a ser processado
+               #If the above verification is true, the nextStep method itself (recursion) is called again,
+               #thus passing the index of the element's column, all the elements of the line, the entire matrix,
+               #the index of the line above the space to be processed.
                resultado = nextStep(indiceColuna, top [1], array, top [2])
 
-               #Se o proximo passo na recursividade acima vier vazio, significa que a estrada chegou ao fim
-               #chamando novamente o proprio metodo nextStep, porem agora passando todas as informacoes do espaco de estrada anterior
-               #pelo qual estava a ser percorrido, forçando a buscar outro caminho a partir deste espaco anterior
+               #If the next step in the above recursion comes up empty, it means that the road has reached the end,
+               #calling the nextStep method again, but now passing all the information from the previous road space
+               #through which it was being traveled, forcing it to look for another path from this previous space.
                if resultado == None:
                    return nextStep(indiceColuna, row, array, indiceLinha)
 
-               #Se no proximo passo a recursividade acima trouxer informacoes, significa que todo o caminho ate um segundo no
-               #representado pelo id de um predio ou armazem ja foi encontrado, processado e incluido no grafo via graphviz
+               #If in the next step the above recursion brings information, it means that the entire path up to a second node
+               #represented by the id of a building or warehouse has already been found, processed and included in the graph node via graphviz.
                else:
                    return resultado
 
@@ -498,7 +498,7 @@ def nextStep(indiceColuna, row, array, indiceLinha):
                    return resultado
 
           else:
-              '''fim da linha'''
+              #end of the line
               return
 
      else:

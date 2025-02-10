@@ -1,36 +1,55 @@
-A matriz usada no Script foi criada com base no esboço a seguir:
+The matrix used in the Script was created based on the following sketch:
 
 <img alt="sketch.png" height="220" src="sketch.png" width="220"/>
 
 ## Def dividirID
-O ID de um espaço é composto por um UUID, seguido de espessura/peso da estrada (se for estrada) ou -1 quando for espaço vazio, seguido de um id/nome de estrada ou id de um prédio/armazém, por fim seguido do nome da outra estrada na qual se for uma estrada com cruzamento.
-### Exemplos: 
-#### _Espaço vazio:_
+The ID of a space is composed of a UUID, followed by the thickness/weight of the road
+(if it is a road) or -1 when it is an empty space, followed by a road id/name 
+or a building/warehouse id, finally followed by the name of the other road if it is a
+crossing road.
+### Exemples: 
+#### _Empty space:_
 `550e8400-e29b-41d4-a716-446655440000_-1`
 
-#### _Estrada com 1 de espessura:_
+#### _Road with thickness 1:_
 `550e8400-e29b-41d4-a716-446655440000_0_4`
 
-#### _Estrada com 2 de espessura:_
+#### _Road with thickness 2:_
 `550e8400-e29b-41d4-a716-446655440000_00_4`
 
-#### _Estrada com cruzamento 1 de espessura:_
+#### _Road intersections with thickness 1:_
 `550e8400-e29b-41d4-a716-446655440000_0_4_2`
 
-#### _Estrada com cruzamento 2 de espessura:_
+#### _Road intersections with thickness 2:_
 `550e8400-e29b-41d4-a716-446655440000_00_4_2`
 
-#### _Prédio:_
+#### _Building:_
 `550e8400-e29b-41d4-a716-446655440000_5`
 
-#### _Armazém:_
+#### _Warehouse:_
 `550e8400-e29b-41d4-a716-446655440000_a3`
 
-Nota-se que o ID de um espaço contém todas essas informações separadas por “_”, sendo assim esta função apenas divide cada uma destas informações e as armazena individualmente em um array, retornando este array.
-
+Note that the ID of a space contains all this information separated by “_”, 
+so this function simply divides each of these pieces of information and stores them
+individually in an array, returning this array.
 ## Def Interseccao
-Esta função verifica os 4 possíveis espaços na diagonal de um elemento do tipo estrada a ser processado. Caso haja 2 diagonais do tipo estrada com o mesmo id/nome, a função retorna uma intersecção do tipo mudança de espessura de estrada. Caso haja 3 diagonais do tipo estrada sendo 2 com o mesmo id/nome e 1 tendo o mesmo id/nome do elemento processado, então a função retorna uma intersecção do tipo mesmas espessuras. Do contrário, ela não retorna nada.
-
+This function checks the 4 possible spaces in the diagonal of a road-type element
+to be processed. If there are 2 road-type diagonals with the same id/name, 
+the function returns an intersection of the road thickness change type.
+If there are 3 road-type diagonals, 2 with the same id/name and 1 having the same id/name
+as the processed element, then the function returns an intersection 
+of the same thickness type. Otherwise, it returns nothing.
 
 ## Def nextStep
-Considerando que o processamento inicial de script fará uma varredura por cada elemento de uma matriz, sendo este elemento considerado um espaço. Esta é uma função recursiva, da qual inicialmente identifica o primeiro espaço do tipo prédio ou armazém e então, a partir daí, busca o próximo espaço em uma linha ortogonal que seja do tipo estrada a partir daí a função entra em recursividade, chamando a ela mesma, buscando sempre o próximo espaço do tipo estrada em uma linha ortogonal até encontrar em algum momento dentro desta linha um prédio ou armazém. Durante a recursividade, entre o primeiro espaço do tipo prédio ou armazém e o último, é guardada as intersecções de estradas. Sendo assim, ao fim da recursividade, retorna-se então como nós do grafo o prédio ou armazém identificado inicialmente, as intersecções e o prédio ou armazém identificado no final.
+Considering that the initial script processing will scan each element of a matrix, 
+this element being considered a space. This is a recursive function, 
+which initially identifies the first space of the building or warehouse type 
+and then, from there, searches for the next space in an orthogonal line 
+that is of the road type. From there, the function enters recursion, 
+calling itself, always searching for the next space of the road type 
+in an orthogonal line until it finds at some point within this line a building
+or warehouse. During the recursion, between the first space of the building 
+or warehouse type and the last, the road intersections are saved. 
+Therefore, at the end of the recursion, the building or warehouse identified
+initially, the intersections and the building or warehouse identified
+at the end are then returned as nodes of the graph.
