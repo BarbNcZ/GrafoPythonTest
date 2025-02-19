@@ -10,8 +10,10 @@ from collections import defaultdict
 # a(ID) = Warehouse
 # (ID) = Building
 
+# SETTABLE
 graphFilename = "graph"
 graphFileExtension = "png"
+crossroadsLimiter = 5
 
 inputMatrix = [
 	[str(uuid.uuid4()) + "_-1",		str(uuid.uuid4()) + "_0_1",		str(uuid.uuid4()) + "_-1",		str(uuid.uuid4()) + "_0_2",		str(uuid.uuid4()) + "_-1",		str(uuid.uuid4()) + "_-1",		str(uuid.uuid4()) + "_00_3",	str(uuid.uuid4()) + "_00_3",	str(uuid.uuid4()) + "_-1",		str(uuid.uuid4()) + "_-1"],
@@ -25,6 +27,25 @@ inputMatrix = [
 	[str(uuid.uuid4()) + "_0_6",   	str(uuid.uuid4()) + "_0_1_6", 	str(uuid.uuid4()) + "_0_6",   	str(uuid.uuid4()) + "_00_2_6",	str(uuid.uuid4()) + "_00_2_6",	str(uuid.uuid4()) + "_0_6",   	str(uuid.uuid4()) + "_00_3_6",	str(uuid.uuid4()) + "_00_3_6",	str(uuid.uuid4()) + "_-1",    	str(uuid.uuid4()) + "_-1" ],
 	[str(uuid.uuid4()) + "_a1",    	str(uuid.uuid4()) + "_a1",    	str(uuid.uuid4()) + "_a1",    	str(uuid.uuid4()) + "_-1",    	str(uuid.uuid4()) + "_10",    	str(uuid.uuid4()) + "_10",    	str(uuid.uuid4()) + "_00_3",  	str(uuid.uuid4()) + "_00_3",  	str(uuid.uuid4()) + "_a4",    	str(uuid.uuid4()) + "_a4"]
 ]
+
+
+# NOT-SETTABLE (DO NOT TOUCH !!)
+
+# Create Digraph
+d = gv.Digraph()
+# Initialize startup node of an edge (from road way)
+startupNode = None
+# Initialize array of backtrack of the road way
+backtrack = []
+# Initialize array of crossroads on the road way
+crossroads = []
+
+graphEdgesData = []
+
+# Constants
+EMPTY_SPACE_ID = "-1"
+NARROW_ROAD_ID = "0"
+WIDE_ROAD_ID = "00"
 
 
 def divideId(id):
@@ -47,6 +68,222 @@ def divideId(id):
 		narrowRoadId = None
 
 	return [thickness, wideRoadId, narrowRoadId, _uuid]
+
+
+def getStartupNodeAndLastNodeFrom(fullElement):
+	global startupNode
+	global EMPTY_SPACE_ID
+	global NARROW_ROAD_ID
+	global WIDE_ROAD_ID
+
+	dividedIdAndElement = getDividedIdAndElement(fullElement)
+
+	if dividedIdAndElement is None:
+		return
+
+	dividedId = dividedIdAndElement[0]
+	element = dividedIdAndElement[1]
+
+	isRoad = dividedId[0] == NARROW_ROAD_ID or dividedId[0] == WIDE_ROAD_ID
+
+	isEmptySpace = element == EMPTY_SPACE_ID
+
+	isTheSameAsStartupNode = element == startupNode
+
+	if dividedId is not None and\
+		not isRoad and\
+		not isEmptySpace and\
+		not isTheSameAsStartupNode:
+
+		return [startupNode, element]
+	else:
+		return
+
+
+def lookAroundForLastBuildingOrWarehouse(top, down, left, right):
+	global d
+	global crossroads
+	global graphEdgesData
+	global crossroadsLimiter
+
+	# Checks if the space above, bellow, on the left or the right of the element to be processed is
+	# not of the road type or even of the empty space type, and also checks if the space above,
+	# bellow, on the left or the right of the element is different from the initial node of which
+	# is a building or warehouse id
+	startupNodeAndLastNodeFromAbove = getStartupNodeAndLastNodeFrom(top)
+	startupNodeAndLastNodeFromBellow = getStartupNodeAndLastNodeFrom(down)
+	startupNodeAndLastNodeFromTheLeft = getStartupNodeAndLastNodeFrom(left)
+	startupNodeAndLastNodeFromTheRight = getStartupNodeAndLastNodeFrom(right)
+
+	if startupNodeAndLastNodeFromAbove is not None:
+		startupNodeFromAbove = startupNodeAndLastNodeFromAbove[0]
+		lastNodeFromAbove = startupNodeAndLastNodeFromAbove[1]
+
+		copyOfCrossroads = crossroads.copy()
+		if len(copyOfCrossroads) <= crossroadsLimiter:
+			canAppend = True
+
+			for data in graphEdgesData:
+				if data[0] == startupNodeFromAbove and areEqual(data[1], copyOfCrossroads) and data[2] == lastNodeFromAbove:
+					canAppend = False
+					break
+
+			if canAppend:
+				graphEdgesData.append([startupNodeFromAbove, copyOfCrossroads, lastNodeFromAbove])
+
+		return startupNodeAndLastNodeFromAbove
+
+	elif startupNodeAndLastNodeFromBellow is not None:
+		startupNodeFromBellow = startupNodeAndLastNodeFromBellow[0]
+		lastNodeFromBellow = startupNodeAndLastNodeFromBellow[1]
+
+		copyOfCrossroads = crossroads.copy()
+		if len(copyOfCrossroads) <= crossroadsLimiter:
+			canAppend = True
+
+			for data in graphEdgesData:
+				if data[0] == startupNodeFromBellow and areEqual(data[1], copyOfCrossroads) and data[2] == lastNodeFromBellow:
+					canAppend = False
+					break
+
+			if canAppend:
+				graphEdgesData.append([startupNodeFromBellow, copyOfCrossroads, lastNodeFromBellow])
+
+		return startupNodeAndLastNodeFromBellow
+
+	elif startupNodeAndLastNodeFromTheLeft is not None:
+		startupNodeFromTheLeft = startupNodeAndLastNodeFromTheLeft[0]
+		lastNodeFromTheLeft = startupNodeAndLastNodeFromTheLeft[1]
+
+		copyOfCrossroads = crossroads.copy()
+		if len(copyOfCrossroads) <= crossroadsLimiter:
+			canAppend = True
+
+			for data in graphEdgesData:
+				if data[0] == startupNodeFromTheLeft and areEqual(data[1], copyOfCrossroads) and data[2] == lastNodeFromTheLeft:
+					canAppend = False
+					break
+
+			if canAppend:
+				graphEdgesData.append([startupNodeFromTheLeft, copyOfCrossroads, lastNodeFromTheLeft])
+
+		return startupNodeAndLastNodeFromTheLeft
+
+	elif startupNodeAndLastNodeFromTheRight is not None:
+		startupNodeFromTheRight = startupNodeAndLastNodeFromTheRight[0]
+		lastNodeFromTheRight = startupNodeAndLastNodeFromTheRight[1]
+
+		copyOfCrossroads = crossroads.copy()
+		if len(copyOfCrossroads) <= crossroadsLimiter:
+			canAppend = True
+
+			for data in graphEdgesData:
+				if data[0] == startupNodeFromTheRight and areEqual(data[1], copyOfCrossroads) and data[2] == lastNodeFromTheRight:
+					canAppend = False
+					break
+
+			if canAppend:
+				graphEdgesData.append([startupNodeFromTheRight, copyOfCrossroads, lastNodeFromTheRight])
+
+		return startupNodeAndLastNodeFromTheRight
+
+	else:
+		return
+
+
+def getNextStepResultVertically(fullElement, columnIndex, row, input, rowIndex):
+	global backtrack
+	global NARROW_ROAD_ID
+	global WIDE_ROAD_ID
+
+	dividedIdAndElement = getDividedIdAndElement(fullElement)
+
+	if dividedIdAndElement is None:
+		return
+
+	dividedId = dividedIdAndElement[0]
+
+	isRoad = dividedId[0] == NARROW_ROAD_ID or dividedId[0] == WIDE_ROAD_ID
+
+	hasPassed = dividedId[len(dividedId) - 1] in backtrack
+
+	# Checks if the space above or bellow the element to be processed is of the road type and also checks if the UUID of the space
+	# above or bellow the element has not been stored in the array that represents the path being taken through the road type spaces
+	if dividedId is not None and \
+		isRoad and \
+		not hasPassed:
+
+		# If the above or bellow element verification is true, the nextStepOnTheRoad method is called again (recursion),
+		# thus passing the index of the element's column, all the elements of the line, the entire matrix,
+		# the index of the line above the space to be processed.
+		nextStepResult = nextStepOnTheRoad(columnIndex, fullElement[1], input, fullElement[2])
+
+		# If the next step in the above or bellow recursion comes up empty, it means that the road has reached the end,
+		# calling the nextStepOnTheRoad method again, but now passing all the information from the previous road space
+		# through which it was being traveled, forcing it to look for another path from this previous space.
+		if nextStepResult is None:
+			return nextStepOnTheRoad(columnIndex, row, input, rowIndex)
+
+		# If in the next step on the road the above or bellow recursion brings information, it means that the entire path up to a second node
+		# represented by the id of a building or warehouse has already been found, processed and included in the graph node via graphviz.
+		else:
+			return nextStepResult
+	else:
+		return
+
+
+def getNextStepResultHorizontally(fullElement, columnIndex, row, input, rowIndex):
+	global backtrack
+	global NARROW_ROAD_ID
+	global WIDE_ROAD_ID
+
+	dividedIdAndElement = getDividedIdAndElement(fullElement)
+	if dividedIdAndElement is None:
+		return
+
+	dividedId = dividedIdAndElement[0]
+
+	isRoad = dividedId[0] == NARROW_ROAD_ID or dividedId[0] == WIDE_ROAD_ID
+
+	hasPassed = dividedId[len(dividedId) - 1] in backtrack
+
+	if dividedId is not None and \
+		isRoad and \
+		not hasPassed:
+
+		nextStepResult = nextStepOnTheRoad(fullElement[2], fullElement[1], input, rowIndex)
+
+		if nextStepResult is None:
+			return nextStepOnTheRoad(columnIndex, row, input, rowIndex)
+
+		else:
+			return nextStepResult
+	else:
+		return
+
+
+def lookAroundWhereToStep(top, down, left, right, columnIndex, row, input, rowIndex):
+	global backtrack
+
+	nextStepResultFromAbove = getNextStepResultVertically(top, columnIndex, row, input, rowIndex)
+	nextStepResultFromBellow = getNextStepResultVertically(down, columnIndex, row, input, rowIndex)
+	nextStepResultFromTheLeft = getNextStepResultHorizontally(left, columnIndex, row, input, rowIndex)
+	nextStepResultFromTheRight = getNextStepResultHorizontally(right, columnIndex, row, input, rowIndex)
+
+	if nextStepResultFromAbove is not None:
+		return nextStepResultFromAbove
+
+	elif nextStepResultFromBellow is not None:
+		return nextStepResultFromBellow
+
+	elif nextStepResultFromTheLeft is not None:
+		return nextStepResultFromTheLeft
+
+	elif nextStepResultFromTheRight is not None:
+		return nextStepResultFromTheRight
+
+	else:
+		return
 
 
 def showElementData(element, row, input, columnIndex, rowIndex):
@@ -210,6 +447,8 @@ def getDiagonalDownRight(columnIndex, row, input, rowIndex):
 
 
 def isCrossroad(columnIndex, row, input, rowIndex):
+	global NARROW_ROAD_ID
+	global WIDE_ROAD_ID
 
 	element = row[columnIndex]
 
@@ -221,7 +460,7 @@ def isCrossroad(columnIndex, row, input, rowIndex):
 
 	# Checking if the element to be processed is a Road based on the thickness information
 	# brought by the ID that was split
-	isRoad = dividedId[0] == '0' or dividedId[0] == '00'
+	isRoad = dividedId[0] == NARROW_ROAD_ID or dividedId[0] == WIDE_ROAD_ID
 
 	# If the above variable is not true, then there are no intersections, returning nothing
 	if not isRoad:
@@ -236,7 +475,7 @@ def isCrossroad(columnIndex, row, input, rowIndex):
 	diagonals = [diagonalTopLeft, diagonalTopRight, diagonalDownLeft, diagonalDownRight]
 
 	# Filtering and storing in an array only the diagonals identified as road
-	roads = [x for x in diagonals if divideId(x) is not None and (divideId(x)[0] == '0' or divideId(x)[0] == '00')]
+	roads = [x for x in diagonals if divideId(x) is not None and (divideId(x)[0] == NARROW_ROAD_ID or divideId(x)[0] == WIDE_ROAD_ID)]
 
 	# If the number of identified roads is equal to 2
 	if len(roads) == 2:
@@ -284,7 +523,7 @@ def isCrossroad(columnIndex, row, input, rowIndex):
 	
 		# Checking if the id/name of the 2 roads are the same, and the id/name of a road
 		# is the same as the element to be processed, thus returning the UUID of the space and the type of intersection
-		#(roads of different thicknesses) represented by y
+		# (roads of different thicknesses) represented by y
 		if road2Id is not None and road1Id is not None and road3Id is not None:
 			roadIds = [road1Id, road2Id, road3Id]
 	
@@ -307,25 +546,28 @@ def isCrossroad(columnIndex, row, input, rowIndex):
 		return
 
 
-# Create Digraph
-d = gv.Digraph()
-# Initialize startup node of an edge (from road way)
-startupNode = None
-# Initialize array of backtrack of the road way
-backtrack = []
-# Initialize array of crossroads on the road way
-crossroads = []
+def getDividedIdAndElement(fullElement):
+	# If there is a space above, bellow, on the left or on the right of the element to be processed
+	if fullElement is None:
+		return
+
+	# Fetches the split id of this space above, bellow, on the left or on the right of he element to be processed
+	dividedId = divideId(fullElement[0])
+
+	# Fetching all id information from the space above, bellow, on the left or on the right of the
+	# element to be processed excluding the UUID
+	element = fullElement[0][fullElement[0].find('_') + 1:]
+
+	return [dividedId, element]
 
 
 def nextStepOnTheRoad(columnIndex, row, input, rowIndex):
-
-	global d
-
 	global startupNode
-
 	global backtrack
-
 	global crossroads
+	global EMPTY_SPACE_ID
+	global NARROW_ROAD_ID
+	global WIDE_ROAD_ID
 
 	elementWithUuid = row[columnIndex]
 
@@ -337,15 +579,15 @@ def nextStepOnTheRoad(columnIndex, row, input, rowIndex):
 
 	# Checking if the element to be processed is a road based on the thickness information
 	# brought by the ID that was split'''
-	isRoad = dividedId[0] == '0' or dividedId[0] == '00'
+	isRoad = dividedId[0] == NARROW_ROAD_ID or dividedId[0] == WIDE_ROAD_ID
 
 	# Checks if the element to be processed is not a road or empty space represented by -1
 	# and also if there is not already an initial node represented by the id of a building or warehouse'''
-	if not isRoad and element != '-1' and startupNode is None:
+	if not isRoad and element != EMPTY_SPACE_ID and startupNode is None:
 		startupNode = element
 
 	# Checks if the element to be processed is not a road or empty space represented by -1
-	elif not isRoad and element != '-1':
+	elif not isRoad and element != EMPTY_SPACE_ID:
 		startup = startupNode
 		startupNode = None
 		backtrack = []
@@ -354,7 +596,7 @@ def nextStepOnTheRoad(columnIndex, row, input, rowIndex):
 
 	# Checks if the element to be processed is not an empty space represented by -1
 	# and if there is already an initial one represented by the id of a building or warehouse
-	elif element != '-1' and startupNode is not None:
+	elif element != EMPTY_SPACE_ID and startupNode is not None:
 
 		# Stores the UUID of the space to be processed in an array that represents the path being taken
 		# through the road-type spaces
@@ -381,147 +623,40 @@ def nextStepOnTheRoad(columnIndex, row, input, rowIndex):
 				if crossroad not in crossroads:
 					crossroads.append(crossroad)
 
-
 		# Searching for the 4 spaces of the element to be processed in an orthogonal line
 		top = getElementTop(columnIndex, row, input, rowIndex)
 		down = getElementDown(columnIndex, row, input, rowIndex)
 		left = getElementLeft(row, columnIndex)
 		right = getElementRight(row, columnIndex)
 
-		dividedTopId = None
-		dividedDownId = None
-		dividedLeftId = None
-		dividedRightId = None
-		topElement = None
-		downElement = None
-		leftElement = None
-		rightElement = None
+		lastBuildingOrWarehouse = lookAroundForLastBuildingOrWarehouse(top, down, left, right)
+		if lastBuildingOrWarehouse is not None:
+			return lastBuildingOrWarehouse
 
-
-		# If there is a space above the element to be processed
-		if top is not None:
-			# Fetches the split id of this space above the element to be processed
-			dividedTopId = divideId(top[0])
-			# Fetching all id information from the space above the element to be processed excluding the UUID
-			topElement = top[0][top[0].find('_') + 1:]
-
-		if down is not None:
-			dividedDownId = divideId(down[0])
-			downElement = down[0][down[0].find('_') + 1:]
-
-		if left is not None:
-			dividedLeftId = divideId(left[0])
-			leftElement = left[0][left[0].find('_') + 1:]
-
-		if right is not None:
-			dividedRightId = divideId(right[0])
-			rightElement = right[0][right[0].find('_') + 1:]
-
-
-		# Checks if the space above the element to be processed is not of the road type or even of the empty space type,
-		# and also checks if the space above the element is different from the initial node of which is a building or warehouse id
-		if dividedTopId is not None and (dividedTopId[0] != '0' and dividedTopId[0] != '00') and topElement != '-1' and topElement != startupNode:
-
-			# Displays the nodes between one building or warehouse and another
-			print('New edge: ', startupNode, topElement)
-			# Displays the crossroad nodes beteween one building or warehouse and another
-			print('Crossroads: ', [x.split('_')[1] for x in crossroads])
-			print('----------')
-
-			# Creates in graphviz the nodes between one building or warehouse and another and the edges between them
-			# that pass through other nodes which are the intersection nodes of roads represented by x or y
-			for crossroad in crossroads:
-				crossroadType = crossroad.split('_')[1]
-				d.edge(startupNode, crossroadType)
-				d.edge(crossroadType, topElement)
-			return [startupNode, topElement]
-
-		elif dividedDownId is not None and (dividedDownId[0] != '0' and dividedDownId[0] != '00') and downElement != '-1'and downElement != startupNode:
-			print('New edge: ', startupNode, downElement)
-			print('Crossroads: ', [x.split('_')[1] for x in crossroads])
-			print('----------')
-			for crossroad in crossroads:
-				crossroadType = crossroad.split ('_')[1]
-				d.edge(startupNode, crossroadType)
-				d.edge(crossroadType, downElement)
-			return [startupNode, downElement]
-
-		elif dividedLeftId is not None and (dividedLeftId[0] != '0' and dividedLeftId[0] != '00') and leftElement != '-1'and leftElement != startupNode:
-			print('New edge: ', startupNode, leftElement)
-			print('Crossroads: ', [x.split('_')[1] for x in crossroads])
-			print('----------')
-			for crossroad in crossroads:
-				crossroadType = crossroad.split ('_')[1]
-				d.edge(startupNode, crossroadType)
-				d.edge(crossroadType, leftElement)
-			return [startupNode, leftElement]
-
-		elif dividedRightId is not None and (dividedRightId[0] != '0' and dividedRightId[0] != '00') and rightElement != '-1'and rightElement != startupNode:
-			print('New edge: ', startupNode, rightElement)
-			print('Crossroads: ', [x.split('_')[1] for x in crossroads])
-			print('----------')
-			for crossroad in crossroads:
-				crossroadType = crossroad.split ('_')[1]
-				d.edge(startupNode, crossroadType)
-				d.edge(crossroadType, rightElement)
-			return [startupNode, rightElement]
-
-
-		# Checks if the space above the element to be processed is of the road type and also checks if the UUID of the space
-		# above the element has not been stored in the array that represents the path being taken through the road type spaces
-
-		elif dividedTopId is not None and (dividedTopId[0] == '0' or dividedTopId[0] == '00') and dividedTopId[len(dividedTopId) - 1] not in backtrack:
-
-			# If the above verification is true, the nextStep method itself (recursion) is called again,
-			# thus passing the index of the element's column, all the elements of the line, the entire matrix,
-			# the index of the line above the space to be processed.
-			nextStepResult = nextStepOnTheRoad(columnIndex, top[1], input, top[2])
-
-			# If the next step in the above recursion comes up empty, it means that the road has reached the end,
-			# calling the nextStep method again, but now passing all the information from the previous road space
-			# through which it was being traveled, forcing it to look for another path from this previous space.
-			if nextStepResult is None:
-				return nextStepOnTheRoad(columnIndex, row, input, rowIndex)
-
-			# If in the next step the above recursion brings information, it means that the entire path up to a second node
-			# represented by the id of a building or warehouse has already been found, processed and included in the graph node via graphviz.
-			else:
-				return nextStepResult
-
-		elif dividedDownId is not None and (dividedDownId[0] == '0' or dividedDownId[0] == '00') and dividedDownId[len(dividedDownId) - 1] not in backtrack:
-			nextStepResult = nextStepOnTheRoad(columnIndex, down[1], input, down[2])
-
-			if nextStepResult is None:
-				return nextStepOnTheRoad(columnIndex, row, input, rowIndex)
-
-			else:
-				return nextStepResult
-
-
-		elif dividedLeftId is not None and (dividedLeftId[0] == '0' or dividedLeftId[0] == '00') and dividedLeftId[len(dividedLeftId) -1] not in backtrack:
-			nextStepResult = nextStepOnTheRoad(left[2], left[1], input, rowIndex)
-
-			if nextStepResult is None:
-				return nextStepOnTheRoad(columnIndex, row, input, rowIndex)
-
-			else:
-				return nextStepResult
-
-		elif dividedRightId is not None and (dividedRightId[0] == '0' or dividedRightId[0] == '00') and dividedRightId[len(dividedRightId) -1] not in backtrack:
-			nextStepResult = nextStepOnTheRoad(right[2], right[1], input, rowIndex)
-
-			if nextStepResult is None:
-				return nextStepOnTheRoad(columnIndex, row, input, rowIndex)
-
-			else:
-				return nextStepResult
+		nextStepResult = lookAroundWhereToStep(top, down, left, right, columnIndex, row, input, rowIndex)
+		if nextStepResult is not None:
+			return nextStepResult
 
 		else:
-			# End of the line
 			return
 
 	else:
 		return
+
+
+def areEqual(array1, array2):
+	if len(array1) != len(array2):
+		return False
+
+	result = True
+	i = 0
+	for item in array1:
+		if item != array2[i]:
+			result = False
+			break
+		i += 1
+
+	return result
 
 
 if __name__ == '__main__':
@@ -543,6 +678,26 @@ if __name__ == '__main__':
 			columnIndex += 1
 
 		rowIndex += 1
+
+	for data in graphEdgesData:
+		graphStartupNode = data[0]
+		graphCrossroads = data[1]
+		graphLastNode = data[2]
+
+		# Displays the nodes between one building or warehouse and another
+		print('New edge: ', graphStartupNode, graphLastNode)
+		# Displays the crossroad nodes between one building or warehouse and another
+		print('Crossroads: ', [x.split('_')[1] for x in graphCrossroads])
+		print('----------')
+
+		# Creates in graphviz the nodes between one building or warehouse and another and the edges between them
+		# that pass through other nodes which are the intersection nodes of roads represented by x or y
+		i = 0
+		for graphCrossroad in graphCrossroads:
+			crossroadType = graphCrossroad.split('_')[1]
+			d.edge(graphStartupNode, crossroadType + str(i))
+			d.edge(crossroadType + str(i), graphLastNode)
+			i += 1
 
 	d.render(graphFilename, format=graphFileExtension, cleanup=True)
 	print(d.source)
